@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weather</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Select town</h1>
+      <form action="/weather" method="post">
+        <select id="region"></select>
+        <input type="submit" id="submit" value="Get Weather Data" />
+      </form>
+      <div id="output">Select town:</div>
+    </div>
+
+    <script type="text/javascript">
+      //create variables to point to the exact html content using document.querySekector
+      const selectRegion = document.querySelector("#region");
+      const output = document.querySelector("#output");
+      const submitBtn = document.querySelector("#submit");
+
+      //asynch function returns an implicit promise so no need to configure promise chains.
+      async function fetchData() {
+        //wait for the promise until it returns a result
+        //use the fetch function that points to a resourse. fetch starts a request and returns a promise that is resolved in the responce.
+        const response = await fetch("/weather");
+        const data = await response.json();
+
+        data.forEach((obj) => {
+          //to append the content of the html we use el.innerHTML += `...`
+          selectRegion.innerHTML += `<option value="${obj["city"]}" name="city_name">${obj["city"]}</option>`;
+        });
+      }
+      async function fetchResData() {
+        const response = await fetch("/weather");
+        const data = await response.json();
+        var select = document.getElementById("region");
+        output.innerHTML = `<div>${data[select.selectedIndex]["city"]} - ${
+          data[select.selectedIndex]["temperature"]
+        }`;
+      }
+
+      //execute
+      fetchData();
+      fetchResData();
+
+      const sendData = async (city) => {
+        //create an object with the post settingsa
+        const settings = {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          //use stringify to convert the object into a json string
+          body: JSON.stringify({
+            city: city,
+          }),
+        };
+      };
+
+      submitBtn.addEventListener("click", (el) => {
+        //use preventDefault for blocking default click handling
+        el.preventDefault();
+        let selectEl = document.getElementById("region").value;
+        sendData(selectEl);
+        fetchResData();
+      });
+    </script>
+  </body>
+</html>
